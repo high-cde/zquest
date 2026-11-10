@@ -1,6 +1,52 @@
 /* Copyright (c) 2026 ZDOS1.3 — P.IVA 11040550961. Tutti i diritti riservati. */
 import type { Config } from "./config.js";
 
+const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+const TOKEN_2022_PROGRAM = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+
+export type MintInfo = {
+  decimals: number;
+  program: "token" | "token-2022";
+  symbol: string | null;
+  name: string | null;
+};
+
+export async function readMintInfo(rpc: string, mint: string): Promise<MintInfo> {
+  const response = await fetch(rpc, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "getAccountInfo",
+      params: [mint, { encoding: "jsonParsed" }],
+    }),
+    signal: AbortSignal.timeout(8000),
+  });
+  const json = (await response.json()) as {
+    result?: {
+      value?: {
+        owner?: string;
+        data?: {
+          parsed?: {
+            info?: {
+              decimals?: number;
+              extensions?: Array<{ extension?: string; state?: { symbol?: string; name?: string } }>;
+            };
+          };
+        };
+      };
+    };
+  };
+  const value = json.result?.value;
+  const decimals = value?.data?.parsed?.info?.decimals;
+  if (!value?.owner || typeof decimals !== "number") throw new Error("mint non letto");
+  const program = value.owner === TOKEN_2022_PROGRAM ? "token-2022" : value.owner === TOKEN_PROGRAM ? "token" : null;
+  if (!program) throw new Error("programma token non riconosciuto");
+  const meta = value.data?.parsed?.info?.extensions?.find((item) => item.extension === "tokenMetadata")?.state;
+  return { decimals, program, symbol: meta?.symbol ?? null, name: meta?.name ?? null };
+}
+
 export async function readOvDecimals(rpc: string, mint: string): Promise<number> {
   const response = await fetch(rpc, {
     method: "POST",

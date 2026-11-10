@@ -1,7 +1,8 @@
 /* Copyright (c) 2026 ZDOS1.3 — P.IVA 11040550961. Tutti i diritti riservati. */
 import { attachBot } from "./boot.js";
 import { assertRuntimeConfig, loadConfig, loadEnvFile } from "./config.js";
-import { refreshDecimals } from "./chain.js";
+import { readMintInfo, refreshDecimals } from "./chain.js";
+import { applyMintChain } from "./airdrop.js";
 import { openDatabase } from "./db.js";
 import { buildApp } from "./app.js";
 import { seedDemo } from "./seed.js";
@@ -40,6 +41,24 @@ log(config.rewardsLive ? "REWARDS_LIVE attivo: gli invii partono solo dopo appro
 const db = openDatabase(config.databasePath);
 if (config.seedDemo) seedDemo(db, Date.now());
 const app = await buildApp({ config, db, logger: config.nodeEnv !== "test" });
+for (const token of config.airdrop.tokens) {
+  try {
+    const info = await readMintInfo(config.solanaRpc, token.mint);
+    applyMintChain(db, token.mint, info);
+    log(`airdrop ${info.symbol ?? token.symbol} ${info.decimals} decimali, programma ${info.program}`);
+  } catch (error) {
+    log(`airdrop ${token.symbol}: decimali non riletti (${error instanceof Error ? error.message : "errore"}), uso ${token.decimals} da elenco.`);
+  }
+}
+if (config.airdrop.rewardsSecret) {
+  try {
+    log(`portafoglio airdrop ${ovPublicFromSecret(config.airdrop.rewardsSecret)}`);
+  } catch {
+    log("chiave airdrop presente ma non valida");
+  }
+} else {
+  log("portafoglio airdrop non configurato");
+}
 await attachBot(app, config, db, log);
 await app.listen({ host: config.host, port: config.port });
 log(`in ascolto su http://${config.host}:${config.port}`);

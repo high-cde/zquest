@@ -4,6 +4,7 @@ import {
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync,
   TOKEN_2022_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { Connection, Keypair, PublicKey, sendAndConfirmTransaction, Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
@@ -58,6 +59,35 @@ export async function sendOv(claim: Claim, config: Config): Promise<string> {
       config.ov.decimals,
       [],
       TOKEN_2022_PROGRAM_ID,
+    ),
+  );
+  return sendAndConfirmTransaction(connection, transaction, [payer], { commitment: "confirmed" });
+}
+
+export async function sendSpl(
+  config: Config,
+  input: { mint: string; program: "token" | "token-2022"; decimals: number; amountAtomic: string; destination: string },
+): Promise<string> {
+  if (!config.rewardsLive) throw new Error("invio disattivato");
+  if (!config.airdrop.rewardsSecret) throw new Error("chiave airdrop assente");
+  const payer = keypairFromSecret(config.airdrop.rewardsSecret);
+  const connection = new Connection(config.solanaRpc, "confirmed");
+  const programId = input.program === "token-2022" ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
+  const mint = new PublicKey(input.mint);
+  const destination = new PublicKey(input.destination);
+  const fromAta = getAssociatedTokenAddressSync(mint, payer.publicKey, false, programId);
+  const toAta = getAssociatedTokenAddressSync(mint, destination, false, programId);
+  const transaction = new Transaction().add(
+    createAssociatedTokenAccountIdempotentInstruction(payer.publicKey, toAta, destination, mint, programId),
+    createTransferCheckedInstruction(
+      fromAta,
+      mint,
+      toAta,
+      payer.publicKey,
+      BigInt(input.amountAtomic),
+      input.decimals,
+      [],
+      programId,
     ),
   );
   return sendAndConfirmTransaction(connection, transaction, [payer], { commitment: "confirmed" });

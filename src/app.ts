@@ -55,6 +55,7 @@ import {
 } from "./quests.js";
 import { anonymizeAccount, createDemoUser, displayOf, eraseDating, requireUser, upsertTelegramUser } from "./users.js";
 import { signSession } from "./auth.js";
+import { registerAirdropRoutes, seedAirdrop, syncRewardsLiveFlag } from "./airdrop.js";
 
 export type AppOptions = {
   config: Config;
@@ -62,6 +63,7 @@ export type AppOptions = {
   logger?: boolean;
   now?: () => number;
   sender?: Sender;
+  airdropSender?: import("./airdrop.js").AirdropSender;
   publicDir?: string;
 };
 
@@ -73,6 +75,8 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
   const bootIso = new Date(now()).toISOString();
   syncFunding(db, "OV", config.ov.budgetHuman, config.ov.decimals, bootIso);
   syncFunding(db, "DSN", config.dsn.budgetHuman, config.dsn.decimals, bootIso);
+  seedAirdrop(db, config);
+  syncRewardsLiveFlag(db, config.rewardsLive);
 
   const app = Fastify({
     logger: options.logger ?? false,
@@ -575,6 +579,17 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
       throw new HttpError(400, "quest", "Revisione non valida.");
     }
     return decideGithub(db, config, body.id, body.accept, now());
+  });
+
+  registerAirdropRoutes(app, {
+    db,
+    config,
+    now,
+    sender: options.airdropSender,
+    authUser,
+    guard,
+    ipOf,
+    requireAdmin: (request) => requireAdmin(request, config),
   });
 
   const publicDir = options.publicDir ?? path.resolve(process.cwd(), "dist/public");

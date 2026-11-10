@@ -1,6 +1,7 @@
 /* Copyright (c) 2026 ZDOS1.3 — P.IVA 11040550961. Tutti i diritti riservati. */
 import { useEffect, useState } from "react";
 import { AdminPage } from "./AdminPage";
+import { AirdropPage } from "./AirdropPage";
 import { DatingPage } from "./DatingPage";
 import { ExtraMenu, GuidePage, LeaderboardPage, PrivacyPage, RulesPage, WalletPage } from "./Extra";
 import { GamesHome, QuizGame, ReflexGame, SaltoGame } from "./Games";
@@ -12,6 +13,7 @@ const LINKS = [
   ["/", "Casa", "coin"],
   ["/giochi", "Giochi", "zillo"],
   ["/quest", "Quest", "brick"],
+  ["/airdrop", "Drop", "coin"],
   ["/incontri", "Incontri", "star"],
   ["/altro", "Altro", "coin"],
 ] as const;
@@ -61,6 +63,7 @@ function render(path: string) {
   if (path === "/giochi/salto") return <SaltoGame />;
   if (path === "/giochi/quiz") return <QuizGame />;
   if (path === "/quest") return <QuestPage />;
+  if (path === "/airdrop") return <AirdropPage />;
   if (path === "/incontri") return <DatingPage />;
   if (path === "/altro") return <ExtraMenu />;
   if (path === "/classifica") return <LeaderboardPage />;

@@ -126,6 +126,13 @@ export function AdminPage() {
           </div>
         ))}
       </Panel>
+      <Panel title="Airdrop">
+        <p className="tiny">Importi, tetti e pausa. In prova il riscatto non invia transazioni.</p>
+        <div className="row">
+          <Button onClick={() => void act("/api/admin/airdrop/pausa", { paused: true })}>Pausa</Button>
+          <Button tone="ghost" onClick={() => void act("/api/admin/airdrop/pausa", { paused: false })}>Riprendi</Button>
+        </div>
+      </Panel>
       <Panel title="GitHub in revisione">
         {github.filter((row) => row.status === "in_revisione").length === 0 ? <p>Niente in attesa.</p> : github.filter((row) => row.status === "in_revisione").map((row) => (
           <div key={row.id}>

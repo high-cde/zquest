@@ -67,6 +67,8 @@ Gli omaggi non partono da soli. Entrano in coda. Chi amministra approva un grupp
 
 Non esistono quest legate a X.
 
+**Airdrop Solana.** Pagina `#/airdrop`. Due gettoni preimpostati, decimali e programma (Token o Token-2022) riletti dal mint: xZDOS (`EnxZzNG8ZarHt1Tez4ipu5yUnXj8rAbyAnXttxnMpump`, simbolo on-chain $DSN su Solana, non il NETkali di Polygon) e $OV. Il portafoglio si collega con una firma Phantom, senza custodia. Le missioni sono verificabili qui: lettura delle regole, un check-in, una manche in classifica, e in più Telegram se il profilo non è dimostrativo. Un riscatto per missione per portafoglio, tetto per portafoglio, tetto giornaliero di comunità, attesa tra un riscatto e l'altro, limite per IP. Con `REWARDS_LIVE=false` il riscatto è `dry_run` e non c'è transazione. L'invio, se un giorno verrà acceso, parte solo da `AIRDROP_REWARDS_SECRET_KEY`. Chi amministra può cambiare importi, tetti e pausa con `ADMIN_TOKEN`.
+
 **Incontri, beta, 18+.** Servizio a parte. L'ingresso è un'autodichiarazione di maggiore età più l'accettazione dei termini: non è una verifica del documento. Il profilo è facoltativo, senza foto. Un match nasce solo se entrambe le persone dicono sì. Si può bloccare, segnalare e cancellare. Niente contenuti espliciti: i testi fuori misura vengono rifiutati.
 
 **Anti-sybil.** Un identificativo Telegram, un indirizzo Solana, un indirizzo Polygon. Il collegamento è una firma di messaggio (Sign-In-With-Solana per $OV, `personal_sign` per $DSN), non una transazione. Limiti di frequenza e una manche in classifica al giorno.

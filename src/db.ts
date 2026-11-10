@@ -298,6 +298,55 @@ function migrate(db: DB): void {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS airdrop_tokens (
+      mint TEXT PRIMARY KEY,
+      symbol TEXT NOT NULL,
+      name TEXT NOT NULL,
+      decimals INTEGER NOT NULL,
+      program TEXT NOT NULL,
+      amount_human INTEGER NOT NULL,
+      wallet_cap_human INTEGER NOT NULL,
+      daily_cap_human INTEGER NOT NULL,
+      cooldown_sec INTEGER NOT NULL,
+      paused INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS airdrop_missions (
+      code TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      detail TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      mint TEXT NOT NULL,
+      amount_human INTEGER NOT NULL,
+      optional INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1
+    );
+
+    CREATE TABLE IF NOT EXISTS airdrop_acks (
+      user_id INTEGER PRIMARY KEY,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS airdrop_claims (
+      id INTEGER PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      wallet TEXT NOT NULL,
+      mission TEXT NOT NULL,
+      mint TEXT NOT NULL,
+      amount_atomic TEXT NOT NULL,
+      day TEXT NOT NULL,
+      status TEXT NOT NULL CHECK (status IN ('settling','dry_run','sent','failed')),
+      tx_ref TEXT,
+      ip TEXT,
+      telegram_id TEXT,
+      detail TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_airdrop_once
+      ON airdrop_claims(wallet, mission)
+      WHERE status IN ('settling','dry_run','sent');
+
     CREATE INDEX IF NOT EXISTS idx_ledger_asset_day ON ledger(asset, day);
     CREATE INDEX IF NOT EXISTS idx_claims_status ON claims(status);
     CREATE INDEX IF NOT EXISTS idx_scores_game ON scores(game, created_at);

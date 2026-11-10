@@ -41,7 +41,31 @@ export type Config = {
   polygonRpc: string;
   ov: TokenConfig;
   dsn: TokenConfig;
+  airdrop: AirdropConfig;
 };
+
+export type AirdropTokenSeed = {
+  mint: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  amountHuman: number;
+  walletCapHuman: number;
+  dailyCapHuman: number;
+  cooldownSec: number;
+};
+
+export type AirdropConfig = {
+  paused: boolean;
+  rewardsPublic: string;
+  rewardsSecret: string;
+  tokens: AirdropTokenSeed[];
+};
+
+const DEFAULT_AIRDROP_TOKENS = [
+  "EnxZzNG8ZarHt1Tez4ipu5yUnXj8rAbyAnXttxnMpump|$DSN|xZDOS|6|5|20|200|3600",
+  "2EN6Y1zM4yyt41gE2muzdJSAgRCAZiXqnmkgpbrspump|$OV|VELVET|6|1|5|50|3600",
+].join(",");
 
 function bool(value: string | undefined, fallback: boolean): boolean {
   if (value === undefined || value.trim() === "") return fallback;
@@ -131,7 +155,39 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       dailyGlobalCapHuman: intEnv(env.DSN_DAILY_GLOBAL_CAP, 400),
       budgetHuman: intEnv(env.DSN_REWARDS_BUDGET, 2000),
     },
+    airdrop: {
+      paused: bool(env.AIRDROP_PAUSED, false),
+      rewardsPublic: env.AIRDROP_REWARDS_PUBKEY?.trim() ?? "",
+      rewardsSecret: env.AIRDROP_REWARDS_SECRET_KEY?.trim() ?? "",
+      tokens: parseAirdropTokens(env.AIRDROP_TOKENS),
+    },
   };
+}
+
+export function parseAirdropTokens(raw: string | undefined): AirdropTokenSeed[] {
+  const text = raw?.trim() ? raw.trim() : DEFAULT_AIRDROP_TOKENS;
+  return text.split(",").map((part) => {
+    const [mint, symbol, name, decimals, amount, walletCap, dailyCap, cooldown] = part.split("|").map((item) => item.trim());
+    if (!mint || !symbol || !name) throw new Error("AIRDROP_TOKENS non valido");
+    return {
+      mint,
+      symbol,
+      name,
+      decimals: Number(decimals),
+      amountHuman: Number(amount),
+      walletCapHuman: Number(walletCap),
+      dailyCapHuman: Number(dailyCap),
+      cooldownSec: Number(cooldown),
+    };
+  }).filter((token) => {
+    if (!Number.isInteger(token.decimals) || token.decimals < 0 || token.decimals > 18) {
+      throw new Error("decimali airdrop non validi");
+    }
+    for (const value of [token.amountHuman, token.walletCapHuman, token.dailyCapHuman, token.cooldownSec]) {
+      if (!Number.isInteger(value) || value < 0) throw new Error("importo airdrop non valido");
+    }
+    return true;
+  });
 }
 
 export function assertRuntimeConfig(config: Config): void {

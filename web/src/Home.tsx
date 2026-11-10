@@ -67,6 +67,11 @@ export function Home() {
           <strong>Salto di Zillo</strong>
           <span className="tiny muted">La moneta scavalca i mattoni.</span>
         </a>
+        <a className="tile" href="#/airdrop">
+          <Sprite name="coin" size={24} alt="" />
+          <strong>Airdrop</strong>
+          <span className="tiny muted">Omaggio fisso, dopo missioni verificate.</span>
+        </a>
         <a className="tile" href="#/giochi/quiz">
           <Sprite name="coin" size={24} alt="" />
           <strong>Quiz ZLang</strong>

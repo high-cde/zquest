@@ -196,6 +196,29 @@ canvas.play {
 .menu a { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #5c4a78; text-decoration: none; min-height: 44px; }
 code { font-size: 13px; color: var(--gold); }
 footer.note { color: var(--mute); font-size: 13px; margin-top: 8px; }
+.drop-sky {
+  position: relative;
+  height: 148px;
+  overflow: hidden;
+  background: #120916;
+  box-shadow: inset 0 0 0 4px var(--gold);
+}
+.drop-coin {
+  position: absolute;
+  top: -36px;
+  width: 36px;
+  height: 36px;
+  animation: zquest-fall 3.2s linear infinite;
+}
+@keyframes zquest-fall {
+  to { transform: translateY(190px); opacity: 0.15; }
+}
+.meter { height: 14px; background: #120916; box-shadow: inset 0 0 0 3px #5c4a78; margin-top: 8px; }
+.meter span { display: block; height: 100%; background: var(--gold); }
+.mission { margin: 12px 0; padding-top: 8px; border-top: 1px solid #5c4a78; }
+@media (prefers-reduced-motion: reduce) {
+  .drop-coin { animation: none; top: 48px; opacity: 1; }
+}
 
 @media (min-width: 800px) {
   .app { padding-bottom: 32px; }
